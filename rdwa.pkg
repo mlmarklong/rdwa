@@ -1,0 +1,7 @@
+v 1.0
+d 'RDWA': Regression(s) discontinuity weighted average estimator
+d 
+d Distribution-Date:   20220417
+d 
+F rdwa.ado
+F rdwa.sthlp

@@ -1,0 +1,5 @@
+v 1.0
+d Materials by Mark C. Long and Jordan Rooklyn
+d marklong@uw.edu
+
+p rdwa
