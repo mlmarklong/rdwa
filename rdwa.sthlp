@@ -154,7 +154,7 @@ of statistical significance). {p_end}
 {col 9}{stata `"use tcresult height weight using http://www.stata-press.com/data/r15/nhanes2.dta"' : use tcresult height weight using http://www.stata-press.com/data/r15/nhanes2.dta}
 {col 9}{stata `"gen bmi=weight/(height/100)^2"' : gen bmi=weight/(height/100)^2}
 {col 9}{stata `"label var bmi "Body Mass Index""' : label var bmi "Body Mass Index"}
-{col 9}{stata `"rdwa tcresult bmi, c(30) samples(10)"' : rdwa tcresult bmi, c(30) samples(10)}
+{col 9}{stata `"rdwa tcresult bmi, c(30) graph1 graph2 graph3 samples(50)"' : rdwa tcresult bmi, c(30) graph1 graph2 graph3 samples(50)}
 
 {title:Stored results}
 
