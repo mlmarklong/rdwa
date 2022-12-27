@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.0 15apr2022}{...}
+{* *! version 1.0.1 27dec2022}{...}
 {title:Title}
 
 {phang}
@@ -30,11 +30,12 @@ where {it:varlist} is
 {synopt:{opt c(#)}}  		Cutoff value for receipt of treatment. Default = 0.{p_end}
 {synopt:{opt p_min(#)}}  	# = Minimum polynomial order to be considered. Default = 0.{p_end}
 {synopt:{opt p_max(#)}}  	# = Maximum polynomial order to be considered. Default = 4.{p_end}
-{synopt:{opt rbc}}  		Generate bias-corrected LATE estimates.{p_end}
+{synopt:{opt rbc}}  		Generate bias-corrected RDTE estimates.{p_end}
 {synopt:{opt kernel(string)}}  	Kernel used for weighting regressions ("uni" (default) or "tri").{p_end}
 {synopt:{opt samples(#)}}  	# of bootstrapped samples used to generate regressions. Default = 200.{p_end}
+{synopt:{opt efron2014}}  	Include Efron's (2014) method for standard error estimates.{p_end}
 {synopt:{opt details_off}} 	Do no show estimates from each bootstrapped sample.{p_end}
-{synopt:{opt graph1}}  		Generate and save a figure showing the distribution of estimated LATEs.{p_end}
+{synopt:{opt graph1}}  		Generate and save a figure showing the distribution of estimated RDTEs.{p_end}
 {synopt:{opt graph2}}  		Generate and save a figure showing the effective weight on obs.{p_end}
 {synopt:{opt graph3}}  		Generate and save a scatterplot with regression lines.{p_end}
 {synopt:{opt graph3_lines(#)}} 	# of regression lines shown in graph 3. Default = min(200, samples).{p_end}
@@ -48,18 +49,18 @@ where {it:varlist} is
 
 {pstd}
 {cmd:rdwa} does the following: 
-(a) presents estimates of the local average treatment effect (LATE) assuming a local linear specification with 
+(a) presents estimates of the regression discontinuity treatment effect (RDTE) assuming a local linear specification with 
 bandwidths determined by the methods of Calonico, Cattaneo, and Titiunik (CCT, 2014a);
 (b) selects the polynomial order using the method of Pei, Lee, Card, and Weber (PLCW, 2021) with bandwidths 
 determined by the methods of Calonico, Cattaneo, and Titiunik (CCT, 2014a); and
-(c) uses the method of Long and Rooklyn (2022), which generates 200 (default) estimates of the LATE 
+(c) uses the method of Long and Rooklyn (2022), which generates 200 (default) estimates of the RDTE 
 using 200 bootstrapped samples and applying the PLCW algorithm to each sample, and presents the average of the 
-LATE estimates and their standard deviation (which yields an estimate of the LATE and its standard error). For more 
-information on this algorithm and its wisdom and efficacy, see 
+RDTE estimates and an estimate for the standard deviation of the average of the 
+RDTE estimates. For more information on this algorithm and its wisdom and efficacy, see 
 {browse "http://evans.uw.edu/profile/long":{it:Regression(s) Discontinuity}.}
 
 {pstd} Using the specifications selected by the Long and Rooklyn algorithm, the {bf:rdwa} command then generates a 
-spiffy graph demonstrating both the PLCW chosen "best" specification and the variance in the estimated LATE that 
+spiffy graph demonstrating both the PLCW chosen "best" specification and the variance in the estimated RDTE that 
 comes from uncertainty about what is the best polynomial order and the best bandwidth.
 
 {pstd} {bf:User Notes:}
@@ -87,38 +88,47 @@ within the bandwidth, where "treated"=1 if X>=cutoff. p_max has 4 as its default
 of Y on X, X^2, X^3, X^4, treated, treated*X, treated*X^2, treated*X^3, and treated*X^4 for observations within the bandwidth. 
 
 {pstd} (4) The default estimates are "conventional" and use conventional standard errors. If the user wishes to generate
-bias-corrected LATE estimates, using the methods of CCT (2014a), for both the PLCW and Long and Rooklyn procedures then the 
+bias-corrected RDTE estimates, using the methods of CCT (2014a), for both the PLCW and Long and Rooklyn procedures then the 
 user should use the "rbc" option. This option will produce robust standard errors for the PLCW results, again using the methods 
-of CCT (2014a). For the Long and Rooklyn results, the standard error will be estimated by the standard deviation of the 200 LATE 
-estimates from the 200 bootstrapped samples. This standard error estimation is "robust" to the issue that CCT's robust standard 
-errors are designed to solve. As explained in CCT (2014b), "bias-corrected RD treatment-effect estimators ... do not perform well 
-in finite samples because the bias estimate introduces additional variability...This variability is not accounted for when forming 
-the associated CIs" (p. 921). However, the bootstrapping procedure that we use {it:does} account for this "additional variability"
-as variation in the bias estimate comes from variation across the bootstrapped samples.  
+of CCT (2014a). For the Long and Rooklyn results, the standard error is estimated using the procedure outlined in Efron (2014) 
+from Equation 3.6. 
 
 {pstd} (5) The default kernel weight is uniform (i.e., equal weight for observations within the bandwidth rather than 
 triangular (i.e., with more weight placed on observations near to the threshold and with a steady decline throughout the range 
 of X on which the regression is run). As documented in our associated paper, a uniform weighting scheme might be better for our 
-algorithm as the average LATE coming from various bandwidths provides less weight on observations away from the cutoff value, 
-even when using uniform weights for each individual regression. If the LATE estimates were based on a single regression, as 
+algorithm as the average RDTE coming from various bandwidths provides less weight on observations away from the cutoff value, 
+even when using uniform weights for each individual regression. If the RDTE estimates were based on a single regression, as 
 standard in the RD literature, then triangular kernels would be recommended per the findings of Cheng, Fan, and Marron (1997), 
 who conclude that for local polynomial estimation the triangular weight function is best for any particular order. 
 For the interested user, {bf:rdwa} allows triangular weights to be used ("kernel(tri)"). 
 
-{pstd} (6) "samples(#)" is the number of bootstrapped samples that are drawn to generate a set of estimated LATEs which are 
-then averaged to generate an estimate of the LATE. The default value is 200 and thus the algorithm will generate 200 
+{pstd} (6) "samples(#)" is the number of bootstrapped samples that are drawn to generate a set of estimated RDTEs which are 
+then averaged to generate an estimate of the RDTE. The default value is 200 and thus the algorithm will generate 200 
 estimates. If the user selects a higher value for "samples", then more than 200 estimates will be generated. A larger value of 
-samples means slower time to completion of the command, but more accurate estimates of the LATE. The user might want to
+samples means slower time to completion of the command, but more accurate estimates of the RDTE. The user might want to
 set samples to a low number as a preliminary run to see what the algorithm produces (e.g., "10" in the example below).
 
-{pstd} (7) {bf:rdwa} shows a summary of the results from the 200 bootstrapped samples. If you do want to see the individual
-estimates of the LATE for each bootstrapped sample, then you should use the "details_off" option.
+{pstd} (7) "efron2014" generates the bias-corrected standard deviation for the smoothed bootstrap estimate (i.e., Efron's 
+Equation 7.25 on p. 1006). Efron shows that in the "ideal case" (i.e., when the number of bootstrap samples equals N^N and with 
+each possible combination of the N observations chosen once), the standard deviation for the smoothed bootstrap estimate 
+(i.e., Equation 3.4 on p. 995) is less than the standard deviation of the various bootstrap estimates (i.e., Equation 2.4 on p. 993). 
+That is, the "standard confidence interval" that is constructed using the standard deviation of the various bootstrap estimates
+(which is the default method used in this program) is too wide. Efron's method corrects this issue. Note, however, that Efron's method
+for estimating the standard deviation in the "ideal case" still requires a high number of bootstrapped samples.  Efron uses 4,000, 
+which is far more than the 200 used as the default setting in this program. When Efron's method is applied using a small number of 
+bootstrapped samples, the resulting estimate of the standard deviation for the smoothed bootstrap estimate is much noisier than
+that found using the standard deviation of the various bootstrap estimates and it may incorrectly suggest that the "standard 
+confidence interval" is too narrow. The user is thus cautioned that this option is best used with a high setting of the samples option, 
+e.g., samples(4000).
 
-{pstd} (8) The "graph1", "graph2", and "graph3" options generate and save three graphs: rdwa_graph1_####_##_##_##_##_##.&&&, 
+{pstd} (8) {bf:rdwa} shows a summary of the results from the 200 bootstrapped samples. If you do want to see the individual
+estimates of the RDTE for each bootstrapped sample, then you should use the "details_off" option.
+
+{pstd} (9) The "graph1", "graph2", and "graph3" options generate and save three graphs: rdwa_graph1_####_##_##_##_##_##.&&&, 
 rdwa_graph2_####_##_##_##_##_##.&&&, and rdwa_graph3_####_##_##_##_##_##.&&&, where ####_##_##_##_##_## is a record of the
 year_month_day_hour_minute_second when the graph was saved and &&& is gph, png, and pdf. "graph1" shows the distribution of the 
-estimated LATEs from the 200 bootstrapped samples. "graph2" shows the effective weight placed on observations to generate the 
-LATEs (with 100% denoting that observations with this value of X are inside the bandwidth in each of the 200 specifications). 
+estimated RDTEs from the 200 bootstrapped samples. "graph2" shows the effective weight placed on observations to generate the 
+RDTEs (with 100% denoting that observations with this value of X are inside the bandwidth in each of the 200 specifications). 
 "graph1" and "graph2" are not produced if the "samples" option is set equal to 1. "graph3"
 shows the raw scatterplot of the data and the 200 regression lines that correspond to the 200 specifications. Graphs are saved
 in three forms: (a) Stata's ".gph" format, which can be opened and manipulated (e.g., colors changed) using Stata's "Graph Editor"; 
@@ -128,17 +138,17 @@ likely to be the most useful for most user.  graph3 relies on the latest version
 {bf:addplot} command. This command must be installed prior to producing the {bf:rdwa} graph using the following command:
 {stata `"net install addplot, replace from(https://raw.githubusercontent.com/benjann/addplot/main/)"' : net install addplot, replace from(https://raw.githubusercontent.com/benjann/addplot/main/)}
 
-{pstd} (9) The default setting for the "graph3_lines" option = min(200, "samples"). If using the default setting for "samples" (200), 
+{pstd} (10) The default setting for the "graph3_lines" option = min(200, "samples"). If using the default setting for "samples" (200), 
 the graph will show all 200 regression lines from these 200 bootsrapped samples. If the user sets a value for "samples" that 
 is greater than the user-set (or default) value of "lines", then the lines shown will be taken from the first "lines" bootstrapped
 samples. For example, if the user includes the following options, "samples(500) lines(100)", then the algorithm will take 500
-bootstrapped samples, generate estimates of the LATE for each using the methods of PLCW(2021), average these 500 estimates to 
-generate the overall estimate of the LATE, and then generate a graph that shows the first 100 out of 500 regression lines. Note
+bootstrapped samples, generate estimates of the RDTE for each using the methods of PLCW(2021), average these 500 estimates to 
+generate the overall estimate of the RDTE, and then generate a graph that shows the first 100 out of 500 regression lines. Note
 that the graph adjusts the extent of transparency of each drawn regression line. With the default value of 200 for "lines",
 each line has a 5% level of color -- if 20 regression lines overlap at a given point, the full color will be shown (as 5%*20
 = 100%).  
 
-{pstd} (10) 
+{pstd} (11) 
 {title:Example}
 
 {pstd}For reproducable results, clear all and set seeds. {p_end}
@@ -147,33 +157,32 @@ each line has a 5% level of color -- if 20 regression lines overlap at a given p
 {col 9}{stata `"set seed 123456789"' : set seed 123456789}
 
 {pstd}Imagine a fictional treatment applied to indviduals with a body mass index (i.e., weight in kilograms / height in meters squared) >= 30.
-Suppose that this treatment is intended to lower serum cholesterol (mg/dL). Does this treatment have an effect at the 30-BMI threshold? (Surprisingly,
-the estimates of the LATE for this fictional treatment does suggest a negative effect on serum cholesterol and this pseudo-effect is at the edge 
-of statistical significance). {p_end}
+Suppose that this treatment is intended to lower serum cholesterol (mg/dL). Does this treatment have an effect at the 30-BMI threshold? (While the 
+point estimates of the RDTE for this fictional treatment suggest a negative effect on serum cholesterol and this pseudo-effect, it is not found to be 
+statistically significant). {p_end}
 
-{col 9}{stata `"use tcresult height weight using http://www.stata-press.com/data/r15/nhanes2.dta"' : use tcresult height weight using http://www.stata-press.com/data/r15/nhanes2.dta}
+{col 9}{stata `"use tcresult height weight in 1/500 using http://www.stata-press.com/data/r15/nhanes2.dta"' : use tcresult height weight in 1/500 using http://www.stata-press.com/data/r15/nhanes2.dta}
 {col 9}{stata `"gen bmi=weight/(height/100)^2"' : gen bmi=weight/(height/100)^2}
 {col 9}{stata `"label var bmi "Body Mass Index""' : label var bmi "Body Mass Index"}
-{col 9}{stata `"rdwa tcresult bmi, c(30) graph1 graph2 graph3 samples(50)"' : rdwa tcresult bmi, c(30) graph1 graph2 graph3 samples(50)}
+{col 9}{stata `"rdwa tcresult bmi, c(30) efron2014 graph1 graph2 graph3 samples(50)"' : rdwa tcresult bmi, c(30) efron2014 graph1 graph2 graph3 samples(50)}
 
 {title:Stored results}
-
 {synoptset 15 tabbed}{...}
 {p2col 5 15 19 2: Scalars}{p_end}
 {synopt:{cmd:e(FULL_obs_l)}}  {p_end}
 {synopt:{cmd:e(FULL_obs_r)}}  {p_end}
 {synopt:{cmd:e(CCT_P)}}  {p_end}
 {synopt:{cmd:e(CCT_BW)}}  {p_end}
-{synopt:{cmd:e(CCT_LATE)}}  {p_end}
-{synopt:{cmd:e(CCT_LATE_se)}}  {p_end}
+{synopt:{cmd:e(CCT_RDTE)}}  {p_end}
+{synopt:{cmd:e(CCT_RDTE_se)}}  {p_end}
 {synopt:{cmd:e(CCT_95ci_lower)}}  {p_end}
 {synopt:{cmd:e(CCT_95ci_upper)}}  {p_end}
 {synopt:{cmd:e(CCT_obs_l)}}  {p_end}
 {synopt:{cmd:e(CCT_obs_r)}}  {p_end}
 {synopt:{cmd:e(PLCW_P)}}  {p_end}
 {synopt:{cmd:e(PLCW_BW)}}  {p_end}
-{synopt:{cmd:e(PLCW_LATE)}}  {p_end}
-{synopt:{cmd:e(PLCW_LATE_se)}}  {p_end}
+{synopt:{cmd:e(PLCW_RDTE)}}  {p_end}
+{synopt:{cmd:e(PLCW_RDTE_se)}}  {p_end}
 {synopt:{cmd:e(PLCW_95ci_lower)}}  {p_end}
 {synopt:{cmd:e(PLCW_95ci_upper)}}  {p_end}
 {synopt:{cmd:e(PLCW_obs_l)}}  {p_end}
@@ -187,21 +196,25 @@ of statistical significance). {p_end}
 {synopt:{cmd:e(LR_sd_BWs)}}  {p_end}
 {synopt:{cmd:e(LR_min_BWs)}}  {p_end}
 {synopt:{cmd:e(LR_max_BWs)}}  {p_end}
-{synopt:{cmd:e(LR_ave_LATEs)}}  {p_end}
-{synopt:{cmd:e(LR_sd_LATEs)}}  {p_end}
-{synopt:{cmd:e(LR_pct_p_1tail)}}  {p_end}
-{synopt:{cmd:e(LR_pct_p_2tail)}}  {p_end}
+{synopt:{cmd:e(LR_ave_obs_l)}}  {p_end}
+{synopt:{cmd:e(LR_ave_obs_r)}}  {p_end}
+{synopt:{cmd:e(LR_min_obs_l)}}  {p_end}
+{synopt:{cmd:e(LR_min_obs_r)}}  {p_end}
+{synopt:{cmd:e(LR_max_obs_l)}}  {p_end}
+{synopt:{cmd:e(LR_max_obs_r)}}  {p_end}
+{synopt:{cmd:e(LR_ave_RDTEs)}}  {p_end}
 {synopt:{cmd:e(LR_pct_95ci_lower)}}  {p_end}
 {synopt:{cmd:e(LR_pct_95ci_upper)}}  {p_end}
+{synopt:{cmd:e(LR_pct_p_1tail)}}  {p_end}
+{synopt:{cmd:e(LR_pct_p_2tail)}}  {p_end}
+{synopt:{cmd:e(LR_sd_ave_RDTEs)}}  {p_end}
 {synopt:{cmd:e(LR_normal_p_2tail)}}  {p_end}
-{synopt:{cmd:e(LR_normal_95ci_upper)}}  {p_end}
 {synopt:{cmd:e(LR_normal_95ci_lower)}}  {p_end}
-{synopt:{cmd:e(LR_max_obs_r)}}  {p_end}
-{synopt:{cmd:e(LR_max_obs_l)}}  {p_end}
-{synopt:{cmd:e(LR_min_obs_r)}}  {p_end}
-{synopt:{cmd:e(LR_min_obs_l)}}  {p_end}
-{synopt:{cmd:e(LR_ave_obs_r)}}  {p_end}
-{synopt:{cmd:e(LR_ave_obs_l)}}  {p_end}
+{synopt:{cmd:e(LR_normal_95ci_upper)}}  {p_end}
+{synopt:{cmd:e(LR_efron2014_sd_ave_RDTEs)}}  {p_end}
+{synopt:{cmd:e(LR_efron2014_normal_p_2tail)}}  {p_end}
+{synopt:{cmd:e(LR_efron2014_normal_95ci_lower)}}  {p_end}
+{synopt:{cmd:e(LR_efron2014_normal_95ci_upper)}}  {p_end}
 
 {title:Acknowledgments}
 {p}
@@ -233,7 +246,7 @@ Jordan Rooklyn, City of Talent{p_end}
 
 {phang}
 Long, M., and J. Rooklyn. 2022.
-{browse "http://evans.uw.edu/profile/long":{it:Regression(s) Discontinuity}}.
+{browse "http://evans.uw.edu/profile/long":{it:Regression(s) Discontinuity: Using Bootstrap Aggregation to Yield Estimates of RD Treatment Effects}}.
 Working paper.
 {p_end}
 
@@ -249,6 +262,12 @@ Calonico, S., M.D. Cattaneo, and R. Titiunik. 2014a. Robust Nonparametric Confid
 {phang}
 Calonico, S., M.D. Cattaneo, and R. Titiunik. 2014b. Robust Data-Driven Inference in the Regression-Discontinuity Design
 {browse "https://journals.sagepub.com/doi/pdf/10.1177/1536867X1401400413":{it:Stata Journal}}, 14(4): 909-946.
+
+{phang}
+Efron, B. 2014. Estimation and Accuracy After Model Selection.
+{browse "https://doi.org/10.1080/01621459.2013.823775":{it:Journal of the American Statistical Association}}, 
+109(507):991-1007.
+{p_end}
 
 {phang}
 Cheng, M., Fan, J, Marron, J.S. 1997. On Automatic Boundary Corrections.
