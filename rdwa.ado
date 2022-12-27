@@ -4,8 +4,8 @@
 * Replaced "LATE" with "RDTE".
 * Added option for computing standard errors using Efron's (2014) bias-corrected smoothed standard error method (Equation 7.25).
 
-capture program drop rdwa1
-program define rdwa1, eclass
+capture program drop rdwa
+program define rdwa, eclass
 	version 15.1
 	syntax varlist(min=2 max=2) [if] [in] [, c(real 0) p_min(integer 0) p_max(integer 4) rbc kernel(string) samples(integer 200) efron2014 details_off graph1 graph2 graph3 graph3_lines(integer 200)]
 	local y: word 1 of `varlist'
