@@ -4,6 +4,9 @@
 * Replaced "LATE" with "RDTE".
 * Added option for computing standard errors using Efron's (2014) bias-corrected smoothed standard error method (Equation 7.25).
 
+*version 1.0.2 August 2023
+*When referencing results from Pei's rdmse command, responded to Pei's March 2023 changes in that command, which shifted from eclass to rclass.
+
 capture program drop rdwa
 program define rdwa, eclass
 	version 15.1
@@ -197,7 +200,7 @@ program define rdwa, eclass
 						local obs_r=e(N_h_r)
 						capture rdmse `y' `x', c(0) p(`p') deriv(0) kernel(`kernel') h(`h_l') b(`b_l')
 						if _rc==0 {
-							local amse=e(amse_bc)
+							local amse=r(amse_bc)
 							if `amse'<`lowest_amse' {
 								local lowest_amse=`amse'
 								local PLCW_best_p=`p'
@@ -223,7 +226,7 @@ program define rdwa, eclass
 						local obs=e(N_h_l)+e(N_h_r)
 						capture rdmse `y' `x', c(0) p(`p') deriv(0) kernel(`kernel') h(`h_l') b(`b_l')
 						if _rc==0 {
-							local amse=e(amse_cl)
+							local amse=r(amse_cl)
 							if `amse'<`lowest_amse' {
 								local lowest_amse=`amse'
 								local PLCW_best_p=`p'
@@ -342,7 +345,7 @@ program define rdwa, eclass
 							local obs=e(N_h_l)+e(N_h_r)
 							capture rdmse `y' `x', c(0) p(`p') deriv(0) kernel(`kernel') h(`h_l') b(`b_l')
 							if _rc==0 {
-								local amse=e(amse_bc)
+								local amse=r(amse_bc)
 								if `amse'<`lowest_amse' {
 									local lowest_amse=`amse'
 									local LR_best_p=`p'
@@ -366,7 +369,7 @@ program define rdwa, eclass
 							local obs=e(N_h_l)+e(N_h_r)
 							capture rdmse `y' `x', c(0) p(`p') deriv(0) kernel(`kernel') h(`h_l') b(`b_l')
 							if _rc==0 {
-								local amse=e(amse_cl)
+								local amse=r(amse_cl)
 								if `amse'<`lowest_amse' {
 									local lowest_amse=`amse'
 									local LR_best_p=`p'
