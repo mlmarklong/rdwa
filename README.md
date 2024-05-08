@@ -8,4 +8,4 @@ Author
 ------
 
 **Mark C. Long and Jordan Rooklyn**  
-marklong@uw.edu  
+marklong@ucr.edu  
