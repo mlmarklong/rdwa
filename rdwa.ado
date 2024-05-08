@@ -4,8 +4,11 @@
 * Replaced "LATE" with "RDTE".
 * Added option for computing standard errors using Efron's (2014) bias-corrected smoothed standard error method (Equation 7.25).
 
-*version 1.0.2 August 2023
-*When referencing results from Pei's rdmse command, responded to Pei's March 2023 changes in that command, which shifted from eclass to rclass.
+* version 1.0.2 August 2023
+* When referencing results from Pei's rdmse command, responded to Pei's March 2023 changes in that command, which shifted from eclass to rclass.
+
+* version 1.0.3 May 2024
+* Fixed one errant line of code to permit graph 3 to run with greater number of samples than lines (replaced [if "`graph3'"!="off" & `samples'<=`graph3_lines' {] with [if "`graph3'"!="off" & `b'<=`graph3_lines' {]
 
 capture program drop rdwa
 program define rdwa, eclass
@@ -385,7 +388,7 @@ program define rdwa, eclass
 				local LR_obs_l=r(N)
 				count if (`x'>=0 & `x'<=0+`LR_best_bw')
 				local LR_obs_r=r(N)
-				if "`graph3'"!="off" & `samples'<=`graph3_lines' {
+				if "`graph3'"!="off" & `b'<=`graph3_lines' {
 					if "`kernel'"=="uni" {
 						gen `weight'=1 if (`x'>=0-`LR_best_bw' & `x'<0)
 						replace `weight'=1 if (`x'>=0 & `x'<=0+`LR_best_bw')
